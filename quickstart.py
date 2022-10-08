@@ -10,19 +10,19 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly", 'https://www.googleapis.com/auth/classroom.courses.readonly']
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_URL = input("Enter spreadsheet URL: ")
 SAMPLE_SPREADSHEET_ID = SAMPLE_SPREADSHEET_URL.strip('https://docs.google.com/spreadsheets/d/')[:-11]
-SAMPLE_RANGE_NAME = "A1:B29"
+SAMPLE_RANGE_NAME = "A2:D30"
 
 def curve(scores: list):
     highest = 0
     for i in scores:
         if i > highest:
             highest = i
-    n = (100 - highest) / 2
+    n = math.sqrt(100 - highest)
     scores = [i + n for i in scores]
     return scores
 
@@ -59,19 +59,35 @@ def main():
             .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME)
             .execute()
         )
+
+        # writeCurve = sheet.values().append(spreadsheetId=SAMPLE_SPREADSHEET_ID, range='D2:D30')
         values = result.get("values", [])
 
         if not values:
             print("No data found.")
-            return None
+            return
 
-        print("Name, Grade:")
+        # print("Name, Grade:")
+        list_ = []
         for row in values:
             # Print columns A and B, represented by indices A and B.
-            print(f"{row[0]}, {row[1]}")
-    except HttpError as err:
+            # print(f"{row[0]}, {row[1]}")
+            row[2] = int(row[2])
+            list_.append(row[2])
+        print(list_)
+        list_ = curve(list_)
+        list_ = [int(i) for i in list_]
+        print(list_)
+        _list_ = []
+        for i in range(len(values)):
+            # Print columns A and E, which correspond to indices 0 and 4.
+            # print('%s %s: %s, %s' % (i[0][0], i[1][0], i[2][0], list_))
+            _list_.append(values[i][2])
+        print(_list_)
+
+    except Exception as err:
         print(err)
 
 
-# if __name__ == "__main__":
-    # main()
+if __name__ == "__main__":
+    main()
