@@ -1,4 +1,5 @@
 from __future__ import print_function
+import math
 
 import os.path
 
@@ -9,36 +10,53 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly", 'https://www.googleapis.com/auth/classroom.courses.readonly']
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_URL = input("Enter spreadsheet URL: ")
 SAMPLE_SPREADSHEET_ID = SAMPLE_SPREADSHEET_URL.strip('https://docs.google.com/spreadsheets/d/')[:-11]
 SAMPLE_RANGE_NAME = "A1:B29"
 
+def curve(value: int):
+    
+    i_min = 0
+    i_max = 100
+    o_min = 0
+    o_max = 100
+
+    a = pow(value - i_min, 2)
+    b = pow(i_max - i_min, 2)
+    c = pow(value - o_max, 2)
+    d = pow(o_max - o_min, 2)
+    final = ((a / b) + (c / d))
+    print(a, b, c, d, final)
+    return final
+
+x = 0
+print(curve(x))
+
+
 
 def main():
-    """Shows basic usage of the Sheets API.
-    Prints values from a sample spreadsheet.
+    """
+    Imports data from a spreadsheet and pushes it to Google Classroom
     """
     creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
+
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            # Local server for logging in to Google account
             creds = flow.run_local_server(
                 port=8080,
                 include_client_id=True,
                 api="AIzaSyCeojUyh1_p2E_F_8Mhb3NSI-IX_UEiGYw",
             )
-        # Save the credentials for the next run
+        # Save credentials
         with open("token.json", "w") as token:
             token.write(creds.to_json())
 
@@ -60,11 +78,11 @@ def main():
 
         print("Name, Grade:")
         for row in values:
-            # Print columns A and E, which correspond to indices 0 and 4.
+            # Print columns A and B, represented by indices A and B.
             print(f"{row[0]}, {row[1]}")
     except HttpError as err:
         print(err)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+    # main()
