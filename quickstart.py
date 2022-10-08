@@ -24,10 +24,7 @@ def curve(value: int):
     o_min = 0
     o_max = 100
 
-    a = pow(value - i_min, 2)
-    b = pow(i_max - i_min, 2)
-    c = pow(value - o_max, 2)
-    d = pow(o_max - o_min, 2)
+    
     final = ((a / b) + (c / d))
     print(a, b, c, d, final)
     return final
