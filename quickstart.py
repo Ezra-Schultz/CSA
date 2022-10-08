@@ -24,11 +24,6 @@ def curve(value: int):
     o_min = 0
     o_max = 100
 
-    
-    final = ((a / b) + (c / d))
-    print(a, b, c, d, final)
-    return final
-
 x = 0
 print(curve(x))
 
