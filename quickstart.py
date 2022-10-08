@@ -17,17 +17,14 @@ SAMPLE_SPREADSHEET_URL = input("Enter spreadsheet URL: ")
 SAMPLE_SPREADSHEET_ID = SAMPLE_SPREADSHEET_URL.strip('https://docs.google.com/spreadsheets/d/')[:-11]
 SAMPLE_RANGE_NAME = "A1:B29"
 
-def curve(value: int):
-    
-    i_min = 0
-    i_max = 100
-    o_min = 0
-    o_max = 100
-
-x = 0
-print(curve(x))
-
-
+def curve(scores: list):
+    highest = 0
+    for i in scores:
+        if i > highest:
+            highest = i
+    n = (100 - highest) / 2
+    scores = [i + n for i in scores]
+    return scores
 
 def main():
     """
@@ -66,7 +63,7 @@ def main():
 
         if not values:
             print("No data found.")
-            return
+            return None
 
         print("Name, Grade:")
         for row in values:
