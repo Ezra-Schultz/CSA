@@ -1,30 +1,35 @@
 from __future__ import print_function
-import math
 
 import os.path
+import gspread
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_URL = input("Enter spreadsheet URL: ")
-SAMPLE_SPREADSHEET_ID = SAMPLE_SPREADSHEET_URL.strip('https://docs.google.com/spreadsheets/d/')[:-11]
-SAMPLE_RANGE_NAME = "A2:D30"
+SAMPLE_SPREADSHEET_ID = SAMPLE_SPREADSHEET_URL.strip(
+    "https://docs.google.com/spreadsheets/d/"
+)[:-11]
+SAMPLE_RANGE_NAME = "A1:D30"
+
 
 def curve(scores: list):
     highest = 0
     for i in scores:
         if i > highest:
             highest = i
-    n = math.sqrt(100 - highest)
+    n = 100 - highest
     scores = [i + n for i in scores]
     return scores
+
 
 def main():
     """
@@ -40,50 +45,42 @@ def main():
         else:
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             # Local server for logging in to Google account
-            creds = flow.run_local_server(
-                port=8080,
-                include_client_id=True,
-                api="AIzaSyCeojUyh1_p2E_F_8Mhb3NSI-IX_UEiGYw",
-            )
+            creds = flow.run_local_server(port=8080, include_client_id=True)
+
         # Save credentials
         with open("token.json", "w") as token:
             token.write(creds.to_json())
 
     try:
-        service = build("sheets", "v4", credentials=creds)
+        # service = build("sheets", "v4", credentials=creds)
 
-        # Call the Sheets API
-        sheet = service.spreadsheets()
-        result = (
-            sheet.values()
-            .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME)
-            .execute()
-        )
+        # sheet = service.spreadsheets()
+        client = gspread.authorize(creds)
+        sheet = client.open("Grades").sheet1
 
         # writeCurve = sheet.values().append(spreadsheetId=SAMPLE_SPREADSHEET_ID, range='D2:D30')
-        values = result.get("values", [])
+        count = 1
+        lst = []
+        while sheet.row_values(count) != []:
+            values = sheet.row_values(count)
+            lst.append(values)
+            count += 1
+        print(lst)
+        # if not values:
+        # print("No data found.")
+        # return
+        cells = sheet.range(SAMPLE_RANGE_NAME)
+        print([cell.value for cell in cells])
+        for i in range(0, len(cells), 4):
+            yield cells[i : i + 4]
 
-        if not values:
-            print("No data found.")
-            return
-
-        # print("Name, Grade:")
-        list_ = []
-        for row in values:
-            # Print columns A and B, represented by indices A and B.
-            # print(f"{row[0]}, {row[1]}")
-            row[2] = int(row[2])
-            list_.append(row[2])
-        print(list_)
-        list_ = curve(list_)
-        list_ = [int(i) for i in list_]
-        print(list_)
-        _list_ = []
+        # curveGrades = curve([int(row[2]) for row in values])
+        # sheet.update_acell(4, 2, curveGrades[1])
         for i in range(len(values)):
-            # Print columns A and E, which correspond to indices 0 and 4.
-            # print('%s %s: %s, %s' % (i[0][0], i[1][0], i[2][0], list_))
-            _list_.append(values[i][2])
-        print(_list_)
+            data = values[i]
+            print(
+                f"{data[0]} {data[1]} -> grade: {data[2]}"
+            )
 
     except Exception as err:
         print(err)

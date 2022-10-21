@@ -1,16 +1,44 @@
 from nltk.corpus import words
-import pyautogui
-import random
-import time
-import requests
+import pyautogui, random, time, requests
 
-pyautogui.hotkey('winleft', '3')
-time.sleep(.1)
-# wordlist = [words.words()[random.randrange(0, len(words.words()))] + ' ' for word in range(len(words.words()))]
-for i in range(29):
-    word = list(words.words()[random.randrange(0, len(words.words()))])
-    word[0] = word[0].upper()
-    word = ''.join(word)
-    pyautogui.typewrite(word, 10e-15)
-    pyautogui.press('down')
-    # [pyautogui.typewrite(word, 10e-15) for word in wordlist]
+wordlist = []
+for i in words.words():
+    wordlist.append(i)
+    print(i)
+
+failed = []
+success = []
+for i in range(10):
+    word = wordlist[random.randrange(0, len(wordlist))]
+    url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word
+    json = requests.get(url).json()
+
+    try:
+        json["title"]
+        failed.append(word)
+    except:
+        json[0]
+        success.append(word)
+print(failed, len(failed))
+print(success, len(success))
+while failed != []:
+    word = wordlist[random.randrange(0, len(wordlist))]
+    url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word
+    json = requests.get(url).json()
+    try:
+        json["title"]
+    except:
+        failed.pop(0)
+        success.append(word)
+    print(failed, success)
+for i in success:
+    url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + i
+    json = requests.get(url).json()
+    i = list(i)
+    i[0] = i[0].upper()
+    i = ''.join(i)
+    print(i)
+    for j in json[0]["meanings"][0]["definitions"]:
+        print(j["definition"])
+    print()
+    
