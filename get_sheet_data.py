@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/drive"
 ]
 
 # The ID and range of a sample spreadsheet.
@@ -50,7 +50,7 @@ def main():
         sheet = client.open_by_url(SPREADSHEET_URL).sheet1
 
         range_ = sheet.range('A1:C30')
-        print(range_)
+        # print(range_)
         format_list = []
         for j in range(3):
             temp_list = []
@@ -61,9 +61,9 @@ def main():
         [print(i) for i in format_list]
         grades = format_list[2][1:]
         grades = [int(i) for i in grades]
-        curves = curve(grades)
-        for i in range(len(curves)):
-            sheet.update_cell(i + 1, 4, curves[i])
+        # curves = curve(grades)
+        # for i in range(len(curves)):
+        #     sheet.update_cell(i + 1, 4, curves[i])
 
     except Exception as err:
         print(err)
